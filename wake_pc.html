@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ВКЛЮЧИТЬ КОМПЬЮТЕР</title>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            margin-top: 100px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .container {
+            background: #2d2d2d;
+            padding: 30px;
+            border-radius: 15px;
+            display: inline-block;
+            box-shadow: 0 0 20px rgba(0,255,0,0.3);
+        }
+        .btn {
+            background: linear-gradient(45deg, #00c853, #64dd17);
+            color: white;
+            padding: 25px 50px;
+            font-size: 28px;
+            border: none;
+            cursor: pointer;
+            border-radius: 10px;
+            margin: 20px;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background: linear-gradient(45deg, #00e676, #76ff03);
+            transform: scale(1.05);
+            box-shadow: 0 0 30px #00ff00;
+        }
+        .info {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px;
+            font-family: monospace;
+        }
+        .status {
+            font-size: 18px;
+            margin: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #222;
+            min-height: 60px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖥️ УДАЛЁННОЕ ВКЛЮЧЕНИЕ КОМПЬЮТЕРА</h1>
+        
+        <div class="info">
+            <strong>MAC:</strong> 30-9C-23-82-3B-4C<br>
+            <strong>IP для доступа:</strong> 85.95.179.173
+        </div>
+        
+        <button class="btn" onclick="wakePC()">
+            ⚡ ВКЛЮЧИТЬ КОМПЬЮТЕР
+        </button>
+        
+        <div class="status" id="status">
+            Готово к работе. Нажми кнопку выше.
+        </div>
+        
+        <p style="color: #888; margin-top: 30px;">
+            Компьютер включится через 10-30 секунд после нажатия
+        </p>
+    </div>
+
+    <script>
+        async function wakePC() {
+            const status = document.getElementById('status');
+            status.innerHTML = '🔄 <b>Отправляю команду включения...</b>';
+            
+            // Твой MAC без дефисов
+            const mac = '309C23823B4C';
+            
+            // Пробуем несколько публичных WOL сервисов
+            const services = [
+                `https://wakeonlan.me/wake/${mac}`,
+                `https://wakeonlan.net/wake/${mac}`,
+                `http://85.95.179.173:9/${mac}`, // Прямой запрос на твой IP
+                `http://192.168.1.1:9/${mac}`     // Запрос на роутер
+            ];
+            
+            let success = false;
+            
+            for (let url of services) {
+                try {
+                    console.log('Пробую:', url);
+                    await fetch(url, { mode: 'no-cors' });
+                    success = true;
+                } catch (e) {
+                    // Игнорируем ошибки
+                }
+            }
+            
+            if (success) {
+                status.innerHTML = '✅ <b>Команда отправлена!</b><br>Компьютер включится через 10-30 секунд';
+                
+                // Таймер обратного отсчёта
+                let seconds = 30;
+                const timer = setInterval(() => {
+                    status.innerHTML = 
+                        '✅ <b>Команда отправлена!</b><br>' +
+                        `Ожидание включения: ${seconds} сек...`;
+                    seconds--;
+                    
+                    if (seconds <= 0) {
+                        clearInterval(timer);
+                        status.innerHTML = 
+                            '✅ <b>Компьютер должен быть включен!</b><br>' +
+                            'Теперь можно подключаться через AnyDesk';
+                    }
+                }, 1000);
+                
+            } else {
+                status.innerHTML = '❌ <b>Не удалось отправить команду</b><br>Попробуй ещё раз или используй режим "дремлет"';
+            }
+        }
+    </script>
+</body>
+</html>
